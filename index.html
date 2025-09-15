@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TileMixer - Random Collage Generator - By anungrmdhn</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <div class="logo">TM</div>
+      <div class="navbar-title">
+        <span class="navbar-main">TileMixer</span>
+        <span class="navbar-sub">by anungrmdhn</span>
+      </div>
+      <span class="navbar-tag">Split • Shuffle • Download</span>
+    </div>
+  </nav>
+  <div class="main-wrap">
+    <!-- Instagram grid menu removed, revert to original layout -->
+    <!-- kiri: panel kontrol -->
+    <div class="sidebar">
+      <div class="file-wrap">
+        <input id="file" type="file" accept="image/*" />
+      </div>
+
+      <div class="controls">
+        <div class="control" title="Columns">
+          <div style="font-weight:600;opacity:0.95;margin-right:8px">Columns</div>
+          <div class="stepper">
+            <button id="colMinus">−</button>
+            <div class="value" id="colsVal">3</div>
+            <button id="colPlus">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control" title="Rows">
+          <div style="font-weight:600;opacity:0.95;margin-right:8px">Rows</div>
+          <div class="stepper">
+            <button id="rowMinus">−</button>
+            <div class="value" id="rowsVal">3</div>
+            <button id="rowPlus">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="control toggle-wrap" title="Show tile numbers">
+          <span>Numbers</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleNumbers" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="actions hidden" id="actions">
+        <button id="shuffleBtn" class="btn small ghost">Reshuffle</button>
+        <button id="clearBtn" class="btn small ghost">Reset</button>
+        <a id="download" class="download" href="#" download="tilemixer_collage.jpg" style="display:none">Download</a>
+        <button id="downloadTiles" class="btn small ghost" style="display:none">Download Tiles (ZIP)</button>
+      </div>
+    </div>
+
+    <!-- kanan: canvas -->
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="drop-area" id="dropArea">
+        <div class="drop-hint">Drop an image here or click "Choose file"</div>
+      </div>
+
+      <!-- loader overlay -->
+      <div class="loader" id="ctLoader" aria-hidden="true" role="status" aria-label="Loading">
+        <div class="spinner" aria-hidden="true"></div>
+      </div>
+
+      <canvas id="canvas" style="max-width:400px;width:100%;height:auto;"></canvas>
+      <canvas id="canvasFull" style="display:none"></canvas>
+    </div>
+  </div> <!-- end .main-wrap -->
+
+  <!-- Detailed description / how-to card -->
+  <div class="info-card" aria-live="polite">
+    <h3>About TileMixer</h3>
+    <p>TileMixer splits a photo into a grid of tiles, shuffles or rearranges them, and lets you export either the full shuffled collage or each individual tile as a ZIP. All processing happens in your browser — files are not uploaded to any server.</p>
+
+    <h4>Features</h4>
+    <ul>
+      <li>Split image into a customizable grid (Columns × Rows).</li>
+      <li>Preview the shuffled collage before download.</li>
+      <li>Toggle visible tile numbers for easy placement and reconstruction.</li>
+      <li>Download the full collage (JPEG) or all tiles as a ZIP of JPGs.</li>
+      <li>Drag & drop to reorder tiles directly in the preview (swap tiles).</li>
+      <li>Drag & drop a file onto the canvas area to load an image when empty.</li>
+    </ul>
+
+    <h4>How to use</h4>
+    <ul>
+      <li>Upload< — Click "Choose file" or drop an image onto the canvas area when it's empty. Supported types: JPG, JPEG, PNG, WebP, GIF.</li>
+      <li>Set grid — Use the Columns and Rows steppers (+ / −) to set how the image is split. Changing them regenerates tiles.</li>
+      <li>Numbering — Toggle "Numbers" to show small numbers on tiles in both preview and tile downloads. (Automatically disabled for grids larger than 10×10 to avoid clutter/performance issues.)</li>
+      <li>Shuffle — Click "Reshuffle" to randomly reorder tiles. Use drag to swap two tiles in the preview for precise placement.</li>
+      <li>Reset — Click "Reset" to clear the image and settings.</li>
+      <li>Download — Use "Download" to save the full collage as a JPEG, or "Download Tiles (ZIP)" to get all tiles as separate JPG files (with numbers if enabled).</li>
+    </ul>
+
+    <h4>Tips & limits</h4>
+    <ul>
+      <li>Large images and very fine grids can be CPU-intensive — use the loader while the app regenerates tiles.</li>
+      <li>Numbering is disabled for grids > 10×10 to reduce clutter and processing time.</li>
+      <li>If tiles ZIP seems corrupted in some environments, try re-downloading — the app creates files client-side and uses a robust ArrayBuffer path.</li>
+      <li>Privacy: images are processed locally in your browser and not uploaded anywhere.</li>
+    </ul>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
