@@ -6,20 +6,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="style.css">
 
-  <!-- ADD: ensure touch gestures on the canvas/preview are delivered to the app (avoid browser scrolling) -->
-  <style>
-    /* limit touch-action override to the interactive regions to avoid breaking normal page scrolling */
-    .canvas-wrap, .drop-area, #canvas, #canvasWrap {
-      touch-action: none;
-      -ms-touch-action: none;
-    }
-    /* if your tiles use a .tile class or draggable attributes, ensure they inherit */
-    .tile, [draggable] {
-      touch-action: none;
-      -ms-touch-action: none;
-    }
-  </style>
-
   <!-- ADD: Primary SEO metas -->
   <meta name="description" content="TileMixer — Split a photo into a customizable grid, shuffle tiles, preview and download the collage or tiles. Client-side image processing; no uploads.">
   <meta name="keywords" content="tile mixer, collage generator, image splitter, shuffle tiles, download tiles, web app, client-side image editor">
@@ -133,10 +119,26 @@
         <div class="spinner" aria-hidden="true"></div>
       </div>
 
-      <canvas id="canvas" style="max-width:400px;width:100%;height:auto;"></canvas>
-      <canvas id="canvasFull" style="display:none"></canvas>
+      <!-- canvas elements: removed inline styles (moved to style.css) -->
+      <canvas id="canvas"></canvas>
+      <canvas id="canvasFull"></canvas>
     </div>
   </div> <!-- end .main-wrap -->
+
+  <!-- ADD: three-column feature row (place above the about/info-card) -->
+  <section class="feature-row" aria-labelledby="feature-row-heading">
+    <div class="col">
+      <img src="images/cat.png" alt="TileMixer preview image">
+    </div>
+
+    <div class="col">
+      <h2 id="feature-row-heading" class="tagline">Turn any photo into a playful, shareable tile collage — split, shuffle and remix in seconds.</h2>
+    </div>
+
+    <div class="col">
+      <p class="privacy"><strong>Safe & Private:</strong> All image processing happens locally in your browser. Nothing is uploaded — your photos remain private.</p>
+    </div>
+  </section>
 
   <!-- Detailed description / how-to card -->
   <div class="info-card" aria-live="polite">
@@ -175,80 +177,20 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="script.js"></script>
 
-  <!-- ADD: simple touch-to-mouse adapter so existing mouse-based drag/drop works on touch devices -->
-  <script>
-    // Only translate single-finger touches that start inside interactive areas.
-    (function () {
-      let activeId = null;
-      let isActive = false;
+  <!-- ADD: footer -->
+  <footer class="footer" role="contentinfo" aria-label="TileMixer footer">
+    <div class="navbar-content">
+      <div class="brand">TileMixer</div>
 
-      function dispatchMouseEvent(type, touch, target) {
-        const evt = new MouseEvent(type, {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          detail: 1,
-          screenX: touch.screenX,
-          screenY: touch.screenY,
-          clientX: touch.clientX,
-          clientY: touch.clientY,
-          button: 0
-        });
-        (target || document.elementFromPoint(touch.clientX, touch.clientY) || document.body).dispatchEvent(evt);
-      }
+      <div class="links" aria-label="External links">
+        <a href="https://github.com/anungding" target="_blank" rel="noopener">GitHub</a>
+        <span aria-hidden="true">•</span>
+        <a href="https://twitter.com/anungrmdhn" target="_blank" rel="noopener">Twitter</a>
+      </div>
 
-      function isInteractiveTarget(node) {
-        return !!node && !!node.closest && !!node.closest('.canvas-wrap, .drop-area, #canvas, .tile, [draggable]');
-      }
-
-      document.addEventListener('touchstart', function (e) {
-        if (e.touches.length !== 1) return;
-        const t = e.touches[0];
-        const target = document.elementFromPoint(t.clientX, t.clientY);
-        if (!isInteractiveTarget(target)) return;
-        activeId = t.identifier;
-        isActive = true;
-        e.preventDefault(); // require passive:false in listener options below to take effect
-        dispatchMouseEvent('mousemove', t, target);
-        dispatchMouseEvent('mousedown', t, target);
-      }, { passive: false });
-
-      document.addEventListener('touchmove', function (e) {
-        if (!isActive) return;
-        for (let i = 0; i < e.touches.length; i++) {
-          const t = e.touches[i];
-          if (t.identifier === activeId) {
-            const target = document.elementFromPoint(t.clientX, t.clientY) || e.target;
-            e.preventDefault();
-            dispatchMouseEvent('mousemove', t, target);
-            break;
-          }
-        }
-      }, { passive: false });
-
-      document.addEventListener('touchend', function (e) {
-        if (!isActive) return;
-        for (let i = 0; i < e.changedTouches.length; i++) {
-          const t = e.changedTouches[i];
-          if (t.identifier === activeId) {
-            const target = document.elementFromPoint(t.clientX, t.clientY) || e.target;
-            e.preventDefault();
-            dispatchMouseEvent('mouseup', t, target);
-            // also fire a click so single-tap behaviors still work
-            dispatchMouseEvent('click', t, target);
-            activeId = null;
-            isActive = false;
-            break;
-          }
-        }
-      }, { passive: false });
-
-      document.addEventListener('touchcancel', function () {
-        activeId = null;
-        isActive = false;
-      });
-    })();
-  </script>
+      <div class="note">Don't forget to drink coffee ☕</div>
+    </div>
+  </footer>
 
 </body>
 </html>

@@ -137,7 +137,7 @@ function drawPreview(tiles, colWidths, rowHeights) {
       ctx.drawImage(tile.canvas, 0, 0, tile.canvas.width, tile.canvas.height, dx, dy, previewColWidths[c], previewRowHeights[r]);
       if (showNumbers) {
         const padX = Math.max(6, Math.round(Math.min(previewColWidths[c], previewRowHeights[r]) * 0.045));
-        const rectW = Math.min(72, Math.round(Math.min(previewColWidths[c], previewRowHeights[r]) * 0.18));
+        const rectW = Math
         const rectH = Math.min(40, Math.round(Math.min(previewColWidths[c], previewRowHeights[r]) * 0.12));
         ctx.fillStyle = "rgba(0,0,0,0.55)";
         ctx.fillRect(dx + padX, dy + padX, rectW, rectH);
@@ -616,3 +616,80 @@ shuffleBtn.onclick = () => {
   drawFromTiles(lastTiles.tiles, cw, rh, ctxFull, canvasFull, showNumbers);
   drawPreview(lastTiles.tiles, cw, rh);
 };
+
+/*
+  Mirror hidden full canvas (canvasFull) to preview canvas (canvas) when
+  numbering is enabled so numbers rendered for downloads also appear in preview.
+  Non-intrusive: only active while the image is present and "Numbers" is checked.
+*/
+(function () {
+  const preview = document.getElementById('canvas');
+  const full = document.getElementById('canvasFull');
+  const toggle = document.getElementById('toggleNumbers');
+  const canvasWrap = document.getElementById('canvasWrap');
+
+  if (!preview || !full || !toggle || !canvasWrap) return;
+
+  let lastHash = 0;
+  let running = true;
+
+  function getSizeForPreview(targetCanvas) {
+    // preserve CSS display size and use devicePixelRatio for crispness
+    const dpr = window.devicePixelRatio || 1;
+    const rect = targetCanvas.getBoundingClientRect();
+    const w = Math.max(1, Math.round(rect.width * dpr));
+    const h = Math.max(1, Math.round(rect.height * dpr));
+    return { w, h, dpr };
+  }
+
+  function copyFullToPreview() {
+    try {
+      // only copy when image present and numbers toggled on
+      if (!canvasWrap.classList.contains('has-image') || !toggle.checked) return false;
+
+      // lightweight change detection - only copy when full canvas content changed
+      const dataURL = full.toDataURL('image/png');
+      const hash = dataURL.length;
+      if (hash === lastHash) return false;
+      lastHash = hash;
+
+      // resize preview bitmap to match visible size * dpr
+      const { w, h } = getSizeForPreview(preview);
+      if (preview.width !== w || preview.height !== h) {
+        preview.width = w;
+        preview.height = h;
+      }
+
+      const pctx = preview.getContext('2d');
+      // clear then draw scaled full canvas
+      pctx.clearRect(0, 0, preview.width, preview.height);
+      pctx.imageSmoothingEnabled = true;
+      pctx.drawImage(full, 0, 0, preview.width, preview.height);
+      return true;
+    } catch (err) {
+      // fail silently to avoid breaking app
+      return false;
+    }
+  }
+
+  // Reset lastHash when toggle changes or when a new image is loaded/cleared
+  toggle.addEventListener('change', () => { lastHash = 0; });
+
+  // observe class changes on canvasWrap to detect image loaded/cleared
+  const mo = new MutationObserver(() => { lastHash = 0; });
+  mo.observe(canvasWrap, { attributes: true, attributeFilter: ['class'] });
+
+  // animation loop that checks for updates; very light when idle
+  (function loop() {
+    if (!running) return;
+    // try to copy if needed; don't hog CPU
+    copyFullToPreview();
+    requestAnimationFrame(loop);
+  })();
+
+  // clean up on page unload
+  window.addEventListener('unload', () => {
+    running = false;
+    mo.disconnect();
+  });
+})();
